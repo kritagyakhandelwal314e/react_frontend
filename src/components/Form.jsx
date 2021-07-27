@@ -34,7 +34,7 @@ const Form = ({currentId, handleSubmit, data, setData, blankData}) => {
   useEffect(() => {
     console.log(data);
   }, [data])
-  
+
   const clear = () => {
     setData(blankData);
   }
@@ -57,7 +57,7 @@ const Form = ({currentId, handleSubmit, data, setData, blankData}) => {
             variant='outlined' 
             label='ID' 
             fullWidth
-            value={data.currentId}
+            value={currentId}
             disabled
           />
           <Container>

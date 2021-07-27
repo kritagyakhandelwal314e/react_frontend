@@ -7,7 +7,8 @@ import InputBase from '@material-ui/core/InputBase';
 import { alpha, makeStyles } from '@material-ui/core/styles';
 import SearchIcon from '@material-ui/icons/Search';
 import MainIcon from './MainIcon';
-import { Modal, Button, Container } from '@material-ui/core';
+import Provider from './Provider';
+import { Modal, Button, Container, Paper } from '@material-ui/core';
 import axios from 'axios';
 import BasicTable from './DataTable';
 import Form from './Form';
@@ -100,6 +101,10 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
+const validateData = (data) => {
+
+}
+
 export default function SearchAppBar() {
   const classes = useStyles();
   const [addProviderModal, setAddProviderModal] = useState(false);
@@ -108,27 +113,74 @@ export default function SearchAppBar() {
   const [providers, setProviders] = useState([]);
   const [currentId, setCurrentId] = useState(null);
   const [data, setData] = useState(blankData);
+  const [viewId, setViewId] = useState(null);
+  const [viewProviderModal, setViewProviderModal] = useState(false);
+  const [viewProviderData, setViewProviderData] = useState(null)
   const handleAddProviderOpen = () => {
     setAddProviderModal(true);
   }
   const handleAddProviderClose = () => {
     setAddProviderModal(false);
+    setData(blankData);
+    setCurrentId(null);
+  }
+  const handleViewProviderClose = () => {
+    setViewProviderModal(false);
+    setViewId(null);
+  }
+  const refreshPage = () => {
+    setSearchString(prev => prev + " ");
+    setSearchString(prev => prev.substr(0, prev.length - 1));
   }
   const handleSubmit = (e) => {
-    e.preventDefault();
-    const resBody = JSON.stringify(data);
-    if(currentId) { // put request
-
-    } else { // post request
-
+    try{
+      e.preventDefault();
+      validateData(data);
+      const resBody = JSON.stringify(data);
+      if(currentId) { // put request
+        const url = `http://127.0.0.1:8000/api/providers/${currentId}`;
+        axios.put(url, data)
+        .then(function (response) {
+          console.log(response);
+          handleAddProviderClose();
+          refreshPage();
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+      } else { // post request
+        const url = 'http://127.0.0.1:8000/api/providers/';
+        axios.post(url, data)
+        .then(function (response) {
+          console.log(response);
+          handleAddProviderClose();
+          refreshPage();
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+      }
+    } catch(error) {
+      console.log(error);
     }
-    // clear();
   }
   const handleSearchChange = (e) => {
     console.log(e.target.value);
     setSearchString(e.target.value);
   }
+  const handleDeleteProvider = (providerId) => {
+    const url = `http://127.0.0.1:8000/api/providers/${providerId}`;
+    axios.delete(url)
+    .then(function (response) {
+      console.log(response);
+      refreshPage();
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
+  }
   useEffect(() => {
+    console.log("triggered");
     const fetchProviders = async (url) => {
       const response = await fetch(url);
       setProviders(await response.json())
@@ -143,6 +195,34 @@ export default function SearchAppBar() {
     fetchProviders(url)
     // console.log(providers);
   }, [searchString])
+  useEffect(() => {
+    if(currentId) {
+      const url = `http://127.0.0.1:8000/api/providers/${currentId}`
+      axios.get(url)
+      .then(function (response) {
+        console.log(response.data);
+        setData(response.data);
+        handleAddProviderOpen();
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+    }
+  }, [currentId])
+  useEffect(() => {
+    if(viewId) {
+      const url = `http://127.0.0.1:8000/api/providers/${viewId}`;
+      axios.get(url)
+      .then(function (response) {
+        console.log(response);
+        setViewProviderData(response.data)
+        setViewProviderModal(true);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+    } else {}
+  }, [viewId])
   return (
     <div className={classes.root}>
       <AppBar position="static">
@@ -183,7 +263,6 @@ export default function SearchAppBar() {
           onClose={handleAddProviderClose}
           aria-labelledby="simple-modal-title"
           aria-describedby="simple-modal-description"
-          width="80%"
         >
           <Form 
             currentId={currentId}
@@ -196,7 +275,27 @@ export default function SearchAppBar() {
         <BasicTable 
           providers = {providers}
           handleAddProviderOpen = {handleAddProviderOpen}
+          setCurrentId={setCurrentId}
+          handleDeleteProvider={handleDeleteProvider}
+          setViewId={setViewId}
         />
+      </Container>
+      <Container>
+        <Modal
+          className={classes.modalScroll}
+          open={viewProviderModal}
+          onClose={handleViewProviderClose}
+          aria-labelledby="simple-modal-title"
+          aria-describedby="simple-modal-description"
+        >
+          <Provider
+            providerData={viewProviderData}
+            setViewId={setViewId}
+            setCurrentId={setCurrentId}
+            handleDeleteProvider={handleDeleteProvider}
+            handleViewProviderClose={handleViewProviderClose}
+          />
+        </Modal>
       </Container>
     </div>
   );

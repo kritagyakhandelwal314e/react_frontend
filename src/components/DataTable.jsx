@@ -13,10 +13,14 @@ const useStyles = makeStyles({
   table: {
     minWidth: 650,
   },
+  spacingMargin: {
+    marginLeft: 10,
+    marginRight: 10,
+  },
 });
 
 
-export default function BasicTable({providers, handleAddProviderOpen, ...props}) {
+export default function BasicTable({providers, handleAddProviderOpen, setCurrentId, handleDeleteProvider, setViewId, ...props}) {
   const classes = useStyles();
 
   return (
@@ -27,12 +31,12 @@ export default function BasicTable({providers, handleAddProviderOpen, ...props})
             <TableCell align="left" rowSpan={2}>Name</TableCell>
             <TableCell align="left" rowSpan={2}>Active</TableCell>
             <TableCell align="left" rowSpan={2}>Department</TableCell>
-            <TableCell align="center" colSpan={3}>Action</TableCell>
+            <TableCell align="center" >Action</TableCell>
             {/* <TableCell align="right">Protein&nbsp;(g)</TableCell> */}
           </TableRow>
           <TableRow>
             {/* <TableCell align="left"></TableCell> */}
-            <TableCell align="center" colSpan={3}>
+            <TableCell align="center" >
               <Button 
                 variant="contained" 
                 color="secondary" 
@@ -52,30 +56,36 @@ export default function BasicTable({providers, handleAddProviderOpen, ...props})
               </TableCell>
               <TableCell align="left">{row.provider_active ? "YES" : "NO"}</TableCell>
               <TableCell align="left">{row.provider_department ? row.provider_department : "Not Mentioned"}</TableCell>
-              <TableCell align="left">
+              <TableCell align="center">
                 <Button 
+                  className={classes.spacingMargin}
                   variant="contained" 
                   color="primary" 
+                  onClick={() => {
+                    setViewId(row.provider_id);
+                  }}
                 >
                   VIEW
                 </Button>
-              </TableCell>
-              <TableCell align="right">
                 <Button 
+                  className={classes.spacingMargin}
                   variant="contained" 
                   color="secondary" 
+                  onClick={() => {
+                    setCurrentId(row.provider_id);
+                  }}
                 >
                   EDIT
                 </Button>
-              </TableCell>
-              <TableCell align="right">
                 <Button 
+                  className={classes.spacingMargin}
                   variant="contained" 
                   color="default" 
+                  onClick={() => handleDeleteProvider(row.provider_id)}
                 >
                   DELETE
                 </Button>
-              </TableCell>  
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
