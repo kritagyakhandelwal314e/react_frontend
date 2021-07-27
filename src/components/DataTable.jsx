@@ -7,7 +7,7 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
-import { Button } from '@material-ui/core';
+import { Button, Divider } from '@material-ui/core';
 
 const useStyles = makeStyles({
   table: {
@@ -17,6 +17,14 @@ const useStyles = makeStyles({
     marginLeft: 10,
     marginRight: 10,
   },
+  container: {
+    maxHeight: 640,
+  },
+  header: {
+    color: "#fff", 
+    fontSize: "1.2em",
+    backgroundColor: "#3f51b5"
+  }
 });
 
 
@@ -24,28 +32,22 @@ export default function BasicTable({providers, handleAddProviderOpen, setCurrent
   const classes = useStyles();
 
   return (
-    <TableContainer component={Paper}>
-      <Table className={classes.table} aria-label="simple table">
-        <TableHead>
+    <TableContainer component={Paper} className={classes.container}>
+      <Table className={classes.table} stickyHeader aria-label="sticky table">
+        <TableHead style={{backgroundColor: "#3f51b5", color: "#fff"}}>
           <TableRow>
-            <TableCell align="left" rowSpan={2}>Name</TableCell>
-            <TableCell align="left" rowSpan={2}>Active</TableCell>
-            <TableCell align="left" rowSpan={2}>Department</TableCell>
-            <TableCell align="center" >Action</TableCell>
-            {/* <TableCell align="right">Protein&nbsp;(g)</TableCell> */}
-          </TableRow>
-          <TableRow>
-            {/* <TableCell align="left"></TableCell> */}
-            <TableCell align="center" >
-              <Button 
+            <TableCell align="left" rowSpan={1} className={classes.header}>Name</TableCell>
+            <TableCell align="left" rowSpan={1} className={classes.header}>Active</TableCell>
+            <TableCell align="left" rowSpan={1} className={classes.header}>Department</TableCell>
+            <TableCell align="center"  className={classes.header}>Action<Divider></Divider><Button 
                 variant="contained" 
                 color="secondary" 
                 onClick={handleAddProviderOpen}
+                className={classes.spacingMargin}
+                style={{marginTop: 10}}
               >
                 Add Provider
-              </Button>
-            </TableCell>
-            {/* <TableCell align="right">Protein&nbsp;(g)</TableCell> */}
+              </Button></TableCell>
           </TableRow>
         </TableHead>
         <TableBody>

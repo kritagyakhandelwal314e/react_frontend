@@ -27,6 +27,10 @@ const useStyles = makeStyles((theme) => ({
   spacingMargin: {
     margin: 10,
   },
+  container: {
+    maxHeight: 740,
+    overflow: "scroll",
+  }
 }));
 const Form = ({currentId, handleSubmit, data, setData, blankData}) => {
   const classes = useStyles();
@@ -42,6 +46,7 @@ const Form = ({currentId, handleSubmit, data, setData, blankData}) => {
   return (
     <Container >
       <Divider/>
+      <p></p>
       <Paper
         className={classes.paper}
       >

@@ -8,34 +8,61 @@ import { alpha, makeStyles } from '@material-ui/core/styles';
 import SearchIcon from '@material-ui/icons/Search';
 import MainIcon from './MainIcon';
 import Provider from './Provider';
-import { Modal, Button, Container, Paper } from '@material-ui/core';
+import { Modal, Button, Container, InputLabel, FormControl, Select, MenuItem, Box, Divider } from '@material-ui/core';
 import axios from 'axios';
 import BasicTable from './DataTable';
 import Form from './Form';
+import Toast from './Toast';
+// const blankData = {
+//   provider_name: '',
+//   provider_active: true,
+//   provider_department: '',
+//   provider_qualifications: [
+//     {
+//       qual_name: ''
+//     }
+//   ],
+//   provider_specialities: [
+//     {
+//       spec_name: ''
+//     }
+//   ],
+//   provider_phones: [
+//     {
+//       phone_country_code: '',
+//       phone_number: ''
+//     }
+//   ],
+//   provider_organisation: {
+//     org_name: '',
+//     org_location: '',
+//     org_address: ''
+//   }
+// }
 const blankData = {
-  provider_name: '',
+  provider_name: 'lolololol',
   provider_active: true,
-  provider_department: '',
+  provider_department: 'lolololol',
   provider_qualifications: [
     {
-      qual_name: ''
+      qual_name: 'lololololol'
     }
   ],
   provider_specialities: [
     {
-      spec_name: ''
+      spec_name: 'lololololol'
     }
   ],
   provider_phones: [
     {
-      phone_country_code: '',
-      phone_number: ''
+      phone_country_code: '+11',
+      phone_number: '1111111111'
     }
   ],
   provider_organisation: {
-    org_name: '',
-    org_location: '',
-    org_address: ''
+    org_name: 'lolololol',
+    org_location: 'lolololol',
+    org_address: 'lolololol'
   }
 }
 const useStyles = makeStyles((theme) => ({
@@ -98,17 +125,64 @@ const useStyles = makeStyles((theme) => ({
     overflow:'scroll',
     height:'100%',
     display:'block'
-  }
+  },
+  spacingMargin: {
+    marginLeft: 10,
+    marginRight: 10,
+  },
 }));
 
 const validateData = (data) => {
-
+  if(data.provider_name.length < 3 || data.provider_name.length > 64) {
+    throw Error('Name Field should be of length 3 to 64 chararcters only.');
+  }
+  if(!(data.provider_active === true || data.provider_active === false)) {
+    throw Error('Active Field should be either true or false.');
+  }
+  if(data.provider_qualifications.length < 1) {
+    throw Error('Qualifications Field should have atleast 1 qualification.');
+  }
+  data.provider_qualifications.map((qualification, indx) => {
+    if(qualification.qual_name.length < 2 || qualification.qual_name.length > 64) {
+      throw Error(`Qualifications ${indx + 1} Field should be of length 2 to 64 chararcters only.`);
+    }
+  })
+  if(data.provider_specialities.length < 1) {
+    throw Error('Speciality Field should have atleast 1 Speciality.');
+  }
+  data.provider_specialities.map((speciality, indx) => {
+    if(speciality.spec_name.length < 2 || speciality.spec_name.length > 64) {
+      throw Error(`Speciality ${indx + 1} Field should be of length 2 to 64 chararcters only.`);
+    }
+  })
+  if(data.provider_phones.length < 1) {
+    throw Error('Phones Field should have atleast 1 Phone.');
+  }
+  data.provider_phones.map((phone, indx) => {
+    if(phone.phone_country_code.length !== 3 || phone.phone_country_code.match(/d\+[0-9][0-9]/i)) {
+      throw Error(`Phone Country Code Field is NOT Valid.`);
+    }
+    if( (phone.phone_number.length < 8 || phone.phone_number.length > 10 ) || phone.phone_country_code.match(/[0-9]{8,10}/i)) {
+      throw Error(`Phone Number Field is NOT Valid.`);
+    }
+  })
+  if(data.provider_department.length > 65) {
+    throw Error('Department Field should be of length less than 64 characters');
+  }
+  if(data.provider_organisation.org_name.length < 3 || data.provider_organisation.org_name.length > 64) {
+    throw Error(`Organisation Name Field should be of length 3 to 64 chararcters only.`);
+  }
+  if(data.provider_organisation.org_address.length < 3 || data.provider_organisation.org_address.length > 64) {
+    throw Error(`Organisation Address Field should be of length 3 to 256 chararcters only.`);
+  }
+  if(data.provider_organisation.org_location.length > 64) {
+    throw Error(`Organisation Location Field should be of length less than 64 chararcters.`);
+  }
 }
 
 export default function SearchAppBar() {
   const classes = useStyles();
   const [addProviderModal, setAddProviderModal] = useState(false);
-  const [edit, setEdit] = useState(false);
   const [searchString, setSearchString] = useState('');
   const [providers, setProviders] = useState([]);
   const [currentId, setCurrentId] = useState(null);
@@ -116,6 +190,14 @@ export default function SearchAppBar() {
   const [viewId, setViewId] = useState(null);
   const [viewProviderModal, setViewProviderModal] = useState(false);
   const [viewProviderData, setViewProviderData] = useState(null)
+  const [pageSize, setPageSize] = useState(5);
+  const [pageNum, setPageNum] = useState(1);
+  const [toastMessage, setToastMessage] = useState("Welcome");
+  const [toastSeverity, setToastSeverity] = useState('info');
+  const [toast, setToast] = useState(false);
+  const handlePageSizeChange = (e) => {
+    setPageSize(e.target.value);
+  }
   const handleAddProviderOpen = () => {
     setAddProviderModal(true);
   }
@@ -144,9 +226,13 @@ export default function SearchAppBar() {
           console.log(response);
           handleAddProviderClose();
           refreshPage();
+          setToastMessage("Successfully Updated");
+          setToastSeverity("success")
         })
         .catch(function (error) {
           console.log(error);
+          setToastMessage(error.message);
+          setToastSeverity("error")
         });
       } else { // post request
         const url = 'http://127.0.0.1:8000/api/providers/';
@@ -155,13 +241,18 @@ export default function SearchAppBar() {
           console.log(response);
           handleAddProviderClose();
           refreshPage();
+          setToastMessage("Successfully Added");
+          setToastSeverity("success")
         })
         .catch(function (error) {
           console.log(error);
+          setToastMessage(error.message);
+          setToastSeverity("error");
         });
       }
     } catch(error) {
-      console.log(error);
+      setToastMessage(error.message);
+      setToastSeverity("error");
     }
   }
   const handleSearchChange = (e) => {
@@ -173,28 +264,42 @@ export default function SearchAppBar() {
     axios.delete(url)
     .then(function (response) {
       console.log(response);
+      setToastMessage("Successfully Deleted");
+      setToastSeverity("success");
+      console.log("hello");
       refreshPage();
     })
     .catch(function (error) {
+      setToastMessage(error.message);
+      setToastSeverity("error")
       console.log(error);
     });
   }
   useEffect(() => {
     console.log("triggered");
     const fetchProviders = async (url) => {
-      const response = await fetch(url);
-      setProviders(await response.json())
-      // console.log(providers);
+      axios.get(url)
+      .then(function (response) {
+        // handle success
+        setProviders(response.data);
+      })
+      .catch(function (error) {
+        // handle error
+        setToastMessage("Server error while fetching data");
+        setToastSeverity("error");
+      });
     }
     let queryString = '';
-    let url = 'http://127.0.0.1:8000/api/providers';
+    let url = 'http://127.0.0.1:8000/api/providers?';
     if(searchString) {
       queryString += 'search_string=' + searchString;
-      url += '/search?' + queryString
+      url = url.substr(0, url.length - 1);
+      url += '/search?' + queryString;
     }
-    fetchProviders(url)
-    // console.log(providers);
-  }, [searchString])
+    url += '&pg_num=' + pageNum;
+    url += '&pg_size=' + pageSize;
+    fetchProviders(url);
+  }, [searchString, pageNum, pageSize])
   useEffect(() => {
     if(currentId) {
       const url = `http://127.0.0.1:8000/api/providers/${currentId}`
@@ -205,6 +310,8 @@ export default function SearchAppBar() {
         handleAddProviderOpen();
       })
       .catch(function (error) {
+        setToastMessage(error.message);
+        setToastSeverity("error")
         console.log(error);
       });
     }
@@ -220,12 +327,24 @@ export default function SearchAppBar() {
       })
       .catch(function (error) {
         console.log(error);
+        setToastMessage(error.message);
+        setToastSeverity("error")
       });
-    } else {}
+    }
   }, [viewId])
+  useEffect(() => {
+    setToast(true);
+  }, [toastMessage, toastSeverity])
   return (
     <div className={classes.root}>
-      <AppBar position="static">
+      {toastMessage && <Toast 
+        message={toastMessage} 
+        setMessage={setToastMessage}
+        severity={toastSeverity}
+        open={toast}
+        setOpen={setToast}
+      />}
+      <AppBar position="fixed">
         <Toolbar>
           <IconButton
             edge="start"
@@ -256,7 +375,7 @@ export default function SearchAppBar() {
         </Toolbar>
       </AppBar>
       <p></p>
-      <Container>
+      <Container style={{marginTop: "7em"}}>
         <Modal
           className={classes.modalScroll}
           open={addProviderModal}
@@ -264,6 +383,12 @@ export default function SearchAppBar() {
           aria-labelledby="simple-modal-title"
           aria-describedby="simple-modal-description"
         >
+          {/* <Toast 
+            message={toastMessage} 
+            severity={toastSeverity}
+            open={toast}
+            setOpen={setToast}
+          /> */}
           <Form 
             currentId={currentId}
             handleSubmit={handleSubmit}
@@ -272,6 +397,50 @@ export default function SearchAppBar() {
             blankData={blankData}
           />
         </Modal>
+        <div>
+          <Box display="flex" p={1}>
+            <Box flexGrow={1} p={1}>
+              <FormControl className={classes.formControl} style={{ width: "100px"}}>
+                <InputLabel id="demo-simple-select-label" >Page Size: </InputLabel>
+                <Select
+                  labelId="demo-simple-select-label"
+                  id="demo-simple-select"
+                  value={pageSize}
+                  onChange={handlePageSizeChange}
+                >
+                  <MenuItem value={5}>5</MenuItem>
+                  <MenuItem value={10}>10</MenuItem>
+                  <MenuItem value={20}>20</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+            <Box display="flex" justifyContent="flex-end" p={1}>
+              <div display="flex" alignSelf="flex-start" p={1}>
+              <Typography color="textSecondary" variant="caption" noWrap={true}>{`Page Number`} </Typography>
+              <Typography>{pageNum}</Typography>
+              </div>
+            </Box>
+            <Box display="flex" p={1} justifyContent="flex-end">
+              <Button
+                variant="contained"
+                color="primary"
+                className={classes.spacingMargin}
+                onClick={() => {
+                  setPageNum(prev => Math.max(1, prev - 1))
+                }}
+              >{"<"}</Button>
+              <Button
+                variant="contained"
+                color="primary"
+                className={classes.spacingMargin}
+                onClick={() => {
+                  setPageNum(prev => prev + 1)
+                }}
+              >{">"}</Button>
+            </Box>
+          </Box>
+        </div>
+        <p></p>
         <BasicTable 
           providers = {providers}
           handleAddProviderOpen = {handleAddProviderOpen}
@@ -288,6 +457,12 @@ export default function SearchAppBar() {
           aria-labelledby="simple-modal-title"
           aria-describedby="simple-modal-description"
         >
+          {/* <Toast 
+            message={toastMessage} 
+            severity={toastSeverity}
+            open={toast}
+            setOpen={setToast}
+          /> */}
           <Provider
             providerData={viewProviderData}
             setViewId={setViewId}
