@@ -13,58 +13,58 @@ import axios from 'axios';
 import BasicTable from './DataTable';
 import Form from './Form';
 import Toast from './Toast';
-// const blankData = {
-//   provider_name: '',
-//   provider_active: true,
-//   provider_department: '',
-//   provider_qualifications: [
-//     {
-//       qual_name: ''
-//     }
-//   ],
-//   provider_specialities: [
-//     {
-//       spec_name: ''
-//     }
-//   ],
-//   provider_phones: [
-//     {
-//       phone_country_code: '',
-//       phone_number: ''
-//     }
-//   ],
-//   provider_organisation: {
-//     org_name: '',
-//     org_location: '',
-//     org_address: ''
-//   }
-// }
 const blankData = {
-  provider_name: 'lolololol',
+  provider_name: '',
   provider_active: true,
-  provider_department: 'lolololol',
+  provider_department: '',
   provider_qualifications: [
     {
-      qual_name: 'lololololol'
+      qual_name: ''
     }
   ],
   provider_specialities: [
     {
-      spec_name: 'lololololol'
+      spec_name: ''
     }
   ],
   provider_phones: [
     {
-      phone_country_code: '+11',
-      phone_number: '1111111111'
+      phone_country_code: '',
+      phone_number: ''
     }
   ],
   provider_organisation: {
-    org_name: 'lolololol',
-    org_location: 'lolololol',
-    org_address: 'lolololol'
+    org_name: '',
+    org_location: '',
+    org_address: ''
   }
 }
+// const blankData = {
+//   provider_name: 'lolololol',
+//   provider_active: true,
+//   provider_department: 'lolololol',
+//   provider_qualifications: [
+//     {
+//       qual_name: 'lololololol'
+//     }
+//   ],
+//   provider_specialities: [
+//     {
+//       spec_name: 'lololololol'
+//     }
+//   ],
+//   provider_phones: [
+//     {
+//       phone_country_code: '+11',
+//       phone_number: '1111111111'
+//     }
+//   ],
+//   provider_organisation: {
+//     org_name: 'lolololol',
+//     org_location: 'lolololol',
+//     org_address: 'lolololol'
+//   }
+// }
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
@@ -423,7 +423,7 @@ export default function SearchAppBar() {
             <Box display="flex" p={1} justifyContent="flex-end">
               <Button
                 variant="contained"
-                color="primary"
+                color="secondary"
                 className={classes.spacingMargin}
                 onClick={() => {
                   setPageNum(prev => Math.max(1, prev - 1))
@@ -431,7 +431,7 @@ export default function SearchAppBar() {
               >{"<"}</Button>
               <Button
                 variant="contained"
-                color="primary"
+                color="secondary"
                 className={classes.spacingMargin}
                 onClick={() => {
                   setPageNum(prev => prev + 1)

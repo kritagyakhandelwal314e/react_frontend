@@ -24,7 +24,13 @@ const useStyles = makeStyles({
     color: "#fff", 
     fontSize: "1.2em",
     backgroundColor: "#3f51b5"
-  }
+  },
+  online: {
+    color: "green"
+  },
+  offline: {
+    color: "#fff"
+  },
 });
 
 
@@ -56,7 +62,7 @@ export default function BasicTable({providers, handleAddProviderOpen, setCurrent
               <TableCell component="th" scope="row">
                 {row.provider_name}
               </TableCell>
-              <TableCell align="left">{row.provider_active ? "YES" : "NO"}</TableCell>
+              <TableCell align="left"><span className={row.provider_active ? classes.online : classes.offline} style={{fontSize: "1.8em"}}>&#9679;</span> </TableCell>
               <TableCell align="left">{row.provider_department ? row.provider_department : "Not Mentioned"}</TableCell>
               <TableCell align="center">
                 <Button 
